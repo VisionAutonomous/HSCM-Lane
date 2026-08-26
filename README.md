@@ -1,188 +1,137 @@
 # HSCM-Lane
 
-Minimal paper-facing source-code release for **HSCM-Lane: A ResNet-Based Encoder-Decoder Architecture with Multi-Level Shifted-Window Context Modeling for Pixel-Wise Lane Segmentation**.
+This repository provides the core implementation of **HSCM-Lane**, the lane-line segmentation model described in the accompanying manuscript. The code is intended to support model inspection, training, validation, and reviewer-side reproducibility of the main experimental setting.
 
-This repository contains the author-generated code needed to inspect, train, evaluate, and run inference for the HSCM-Lane binary lane-line segmentation model. It intentionally excludes datasets, trained checkpoints, generated figures, video demos, virtual environments, IDE metadata, GUI-only code, and exploratory backbone variants not used by the paper-facing HSCM-Lane-S/M/L configurations.
+## Overview
 
-## Paper-facing model names
+HSCM-Lane is a compact deep-learning framework for pixel-wise lane-line segmentation in road-scene images. The repository focuses on the final manuscript model and the minimum set of scripts required to reproduce the principal experiments.
 
-The public model class is named `HSCMLane` to match the manuscript terminology. The three reported configurations are:
+The release includes the model implementation, dataset interfaces, loss functions, evaluation utilities, training and validation scripts, and a minimal usage example. It is designed as a clean research-code release rather than a full development workspace.
 
-| Paper name | Backbone | HSCM levels | Window | Depth | Decoder fusion |
-|---|---|---:|---:|---:|---|
-| HSCM-Lane-S | ResNet18 | 1/4, 1/8, 1/16 | 8 | 2 | static sum |
-| HSCM-Lane-M | ResNet34 | 1/4, 1/8, 1/16 | 8 | 2 | static sum |
-| HSCM-Lane-L | ResNet50 | 1/4, 1/8, 1/16 | 8 | 2 | static sum |
+## Repository Scope
 
+This repository contains the code required for the manuscript model and its reproducibility workflow. Temporary development files, local environment folders, generated outputs, large datasets, trained checkpoints, and exploratory research variants are not included in order to keep the public release concise and reproducible.
 
-## Repository layout
+Users should prepare the required datasets separately according to the official dataset instructions and update the dataset paths before running training or validation.
+
+## Main Files
 
 ```text
-HSCM-Lane/
-├── hscm_lane/
-│   ├── __init__.py
-│   ├── model.py
-│   ├── datasets.py
-│   ├── losses.py
-│   └── metrics.py
-├── configs/
-│   ├── hyperparameters.yaml
-│   ├── hscm_lane_s_resnet18.yaml
-│   ├── hscm_lane_m_resnet34.yaml
-│   └── hscm_lane_l_resnet50.yaml
+.
+├── laneformer.py
 ├── train.py
-├── evaluate_bdd100k.py
-├── evaluate_tusimple.py
-├── infer_image.py
-├── CODE_AVAILABILITY.md
-├── requirements.txt
-├── LICENSE
+├── val.py
+├── run_with_5_interface_functions.py
+├── BDD100K.py
+├── TuSimple.py
+├── loss.py
+├── IOUEval.py
 └── README.md
 ```
 
-## What was intentionally removed
+The main files serve the following purposes:
 
-The release is restricted to the code required for the manuscript model and reproducibility. The following materials are not included:
-
-```text
-.idea/
-.venv/
-__pycache__/
-old/
-outputs/
-videos/
-BDD100K/
-TuSimple/
-weights/
-GUI demo files
-RegNet, SegFormer, DINO, DINOv2, and FlashInternImage exploratory backbones
-Detail-path and LAM experimental modules
-OHEM and boundary-loss experimental training options
-```
+* `laneformer.py`: implementation of the proposed HSCM-Lane model.
+* `train.py`: training entry point for the manuscript model.
+* `val.py`: validation and evaluation entry point.
+* `run_with_5_interface_functions.py`: minimal example showing how to call the model through the main interface functions.
+* `BDD100K.py`: dataset interface for BDD100K-based experiments.
+* `TuSimple.py`: dataset interface for TuSimple-based evaluation or qualitative testing.
+* `loss.py`: loss functions used during model training.
+* `IOUEval.py`: evaluation utilities for segmentation metrics.
 
 ## Environment
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+The code requires a Python deep-learning environment with PyTorch and common computer-vision libraries. A typical environment includes:
+
+```text
+python
+torch
+torchvision
+numpy
+opencv-python
+pillow
+tqdm
 ```
 
-On Windows PowerShell, activate the environment with:
+Users may install the required packages manually or create their own environment according to their CUDA, PyTorch, and GPU configuration.
 
-```powershell
-.venv\Scripts\Activate.ps1
-```
+## Dataset Preparation
 
-Install the PyTorch build appropriate for your CUDA version if the generic requirement does not match your system.
+The datasets are not redistributed in this repository. Please download and prepare each dataset from its official source and ensure that the local directory structure matches the paths used by the dataset interface files.
 
-## Dataset placement
+Before running the code, update the dataset paths in the corresponding scripts or dataset-interface files.
 
-Datasets are **not redistributed** in this repository. Prepare BDD100K in the following form:
+Expected datasets:
 
 ```text
 BDD100K/
-├── 100k/
-│   ├── train/*.jpg
-│   └── val/*.jpg
-└── bdd_lane_gt/
-    ├── train/*.png
-    └── val/*.png
-```
-
-For TuSimple derived pixel-level evaluation:
-
-```text
 TuSimple/
-├── clips/...
-├── label_data_0313.json
-├── label_data_0531.json
-└── label_data_0601.json
 ```
 
-The TuSimple evaluation script converts row-wise lane annotations into binary masks. These results are not official TuSimple benchmark scores.
-
-## Quick sanity check
-
-```bash
-python -m py_compile train.py evaluate_bdd100k.py evaluate_tusimple.py infer_image.py hscm_lane/model.py
-python - <<'PY'
-import torch
-from hscm_lane import HSCMLane
-model = HSCMLane(backbone="resnet18", pretrained_backbone=False)
-x = torch.randn(1, 3, 384, 640)
-y = model(x)
-print(y.shape)
-PY
-```
-
-Expected output:
-
-```text
-torch.Size([1, 2, 384, 640])
-```
+The repository provides dataset-loading interfaces, but the image files and annotations must be prepared locally by the user.
 
 ## Training
 
-HSCM-Lane-S:
+After preparing the dataset paths and environment, run:
 
 ```bash
-python train.py \
-  --device cuda:0 \
-  --data-root /path/to/BDD100K \
-  --project runs/hscm_lane \
-  --name hscm_lane_s_resnet18 \
-  --backbone resnet18 \
-  --batch-size 12 \
-  --val-batch-size 64 \
-  --workers 12 \
-  --max-epochs 80 \
-  --ema \
-  --fusion sum \
-  --swin-depth 2 \
-  --window-size 8
+python train.py
 ```
 
-Use `--backbone resnet34` for HSCM-Lane-M and `--backbone resnet50` for HSCM-Lane-L. Checkpoints are saved under `runs/hscm_lane/<name>/weights/`. The selected checkpoint is `best.pth`, chosen by validation lane IoU.
+The training script loads the model, prepares the dataset, computes the loss, and updates the network parameters according to the manuscript setting.
 
-## BDD100K evaluation
+If necessary, users should adjust batch size, learning rate, dataset root, checkpoint path, and device settings according to their hardware environment.
+
+## Validation
+
+To evaluate a trained model, run:
 
 ```bash
-python evaluate_bdd100k.py \
-  --device cuda:0 \
-  --data-root /path/to/BDD100K \
-  --weights runs/hscm_lane/hscm_lane_s_resnet18/weights/best.pth \
-  --backbone resnet18 \
-  --batch-size 64 \
-  --workers 12
+python val.py
 ```
 
-The script reports lane IoU, lane recall, lane precision, lane F1, balanced accuracy, and the confusion-matrix counts. The model outputs logits of shape `[B, 2, 384, 640]`. Evaluation crops 12 pixels from the top and bottom before comparing against the `[B, 2, 360, 640]` target mask.
+The validation script computes the segmentation metrics used to assess lane-line prediction quality. Users should verify that the checkpoint path and validation dataset path are correctly configured before running the script.
 
-## TuSimple derived pixel-level evaluation
+## Minimal Model Usage
+
+A compact example is provided in:
 
 ```bash
-python evaluate_tusimple.py \
-  --device cuda:0 \
-  --tusimple-root /path/to/TuSimple \
-  --weights runs/hscm_lane/hscm_lane_s_resnet18/weights/best.pth \
-  --backbone resnet18 \
-  --gt-style bdd \
-  --batch-size 64 \
-  --workers 12
+python run_with_5_interface_functions.py
 ```
 
-## Inference on images
+This file demonstrates how to call the model through the main interface functions and is intended to help reviewers inspect the inference workflow without reading the full training pipeline first.
 
-```bash
-python infer_image.py \
-  --device cuda:0 \
-  --source /path/to/images_or_one_image \
-  --weights runs/hscm_lane/hscm_lane_s_resnet18/weights/best.pth \
-  --backbone resnet18 \
-  --out-dir outputs/inference
+## Checkpoints
+
+Large trained checkpoint files are not bundled with this lightweight code release. If checkpoints are required for review or reproduction, they can be provided separately through an external storage link or supplementary material.
+
+When using a checkpoint, please update the checkpoint path in the validation or inference script before execution.
+
+## Reproducibility Notes
+
+To reproduce the manuscript experiments, users should keep the model configuration, input resolution, dataset split, training protocol, and evaluation script consistent with the manuscript. Differences in library versions, CUDA versions, GPU hardware, random seeds, and data preprocessing may lead to small numerical variations.
+
+The repository is therefore intended to provide transparent implementation details and a practical reproduction path, while the exact experimental protocol should be interpreted together with the manuscript.
+
+## Citation
+
+If this repository is useful for your research, please cite the accompanying manuscript.
+
+```bibtex
+@article{hscmlane,
+  title   = {HSCM-Lane: [Manuscript Title]},
+  author  = {[Author Names]},
+  journal = {[Journal Name]},
+  year    = {[Year]}
+}
 ```
 
 ## License
 
-The source code is released under the MIT License. Dataset images and annotations are not included and remain subject to their original licenses and terms.
+Please use this repository for academic research and manuscript-review purposes. Dataset usage must follow the licenses and terms of the original dataset providers.
+
+## Contact
+
+For questions about the implementation or reproducibility workflow, please contact the corresponding author of the manuscript.
