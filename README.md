@@ -93,16 +93,6 @@ python val.py
 
 The validation script computes the segmentation metrics used to assess lane-line prediction quality. Users should verify that the checkpoint path and validation dataset path are correctly configured before running the script.
 
-## Minimal Model Usage
-
-A compact example is provided in:
-
-```bash
-python run_with_5_interface_functions.py
-```
-
-This file demonstrates how to call the model through the main interface functions and is intended to help reviewers inspect the inference workflow without reading the full training pipeline first.
-
 ## Checkpoints
 
 Large trained checkpoint files are not bundled with this lightweight code release. If checkpoints are required for review or reproduction, they can be provided separately through an external storage link or supplementary material.
