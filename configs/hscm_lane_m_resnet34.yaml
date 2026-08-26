@@ -1,0 +1,28 @@
+name: hscm_lane_m_resnet34
+paper_model_name: HSCM-Lane-M
+backbone: resnet34
+input_size: [384, 640]
+output_logits: [2, 384, 640]
+evaluation_crop: [12, 12]
+hscm:
+  levels: ["1/4", "1/8", "1/16"]
+  window_size: 8
+  depth: 2
+decoder:
+  fusion: sum
+training:
+  epochs: 80
+  optimizer: AdamW
+  lr: 0.0005
+  warmup_epochs: 5
+  scheduler: poly
+  poly_power: 1.5
+  batch_size: 12
+  val_batch_size: 64
+loss:
+  focal_weight: 1.0
+  tversky_weight: 1.0
+command: >
+  python train.py --device cuda:0 --data-root /path/to/BDD100K --project runs/hscm_lane --name hscm_lane_m_resnet34
+  --backbone resnet34 --batch-size 12 --val-batch-size 64 --workers 12 --max-epochs 80
+  --ema --fusion sum --swin-depth 2 --window-size 8

@@ -1,0 +1,28 @@
+# HSCM-Lane paper-facing default hyperparameters.
+lr: 0.0005
+momentum: 0.9
+eps: 0.00000001
+weight_decay: 0.01
+
+# Data augmentation
+degrees: 0
+translate: 0
+scale: 0
+shear: 0
+hgain: 0.5
+sgain: 0.5
+vgain: 0.5
+width_crop: 640
+height_crop: 384
+prob_perspective: 0.5
+prob_flip: 0.5
+prob_hsv: 0.5
+prob_bilateral: 0.5
+prob_gaussian: 0.5
+prob_crop: 0.5
+
+# Loss coefficients used by the lane-line branch.
+alpha2: 0.9
+gamma2: 1.3333
+alpha3: 0.25
+gamma3: 2.0

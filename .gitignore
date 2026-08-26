@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.idea/
+.vscode/
+.DS_Store
+runs/
+outputs/
+checkpoints/*.pth
+checkpoints/*.pt
+checkpoints/*.onnx
+BDD100K/
+TuSimple/
+*.zip
