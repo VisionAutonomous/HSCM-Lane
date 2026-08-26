@@ -1,20 +1,54 @@
 # HSCM-Lane
 
-This repository provides the core implementation of **HSCM-Lane**, the lane-line segmentation model described in the accompanying manuscript. The code is intended to support model inspection, training, validation, and reviewer-side reproducibility of the main experimental setting.
+Official implementation of **HSCM-Lane: A ResNet-Based Encoder-Decoder Architecture with Multi-Level Shifted-Window Context Modeling for Pixel-Wise Lane Segmentation**.
+
+**Authors:** Toai Ton Quang, Hien Vu Thanh, Nguyen Vu Thanh, and Tuong Le
 
 ## Overview
 
-HSCM-Lane is a compact deep-learning framework for pixel-wise lane-line segmentation in road-scene images. The repository focuses on the final manuscript model and the minimum set of scripts required to reproduce the principal experiments.
+HSCM-Lane is a compact deep-learning framework for pixel-wise binary lane segmentation in road-scene images. The model is designed to improve lane-mask segmentation under challenging conditions such as sparse lane markings, thin structures, low contrast, occlusion, discontinuous markings, shadows, road-surface reflections, and adverse illumination.
 
-The release includes the model implementation, dataset interfaces, loss functions, evaluation utilities, training and validation scripts, and a minimal usage example. It is designed as a clean research-code release rather than a full development workspace.
+The architecture follows a ResNet-based encoder-decoder design enhanced by a Hierarchical Swin Context Module (HSCM). The HSCM module performs multi-level shifted-window context modeling at intermediate encoder feature levels, allowing the network to combine the local inductive bias of convolutional features with attention-based spatial context modeling.
+
+This repository provides the core implementation required to inspect, train, validate, and reproduce the main HSCM-Lane experimental workflow.
+
+## Method Summary
+
+HSCM-Lane consists of three main components:
+
+1. **ResNet-based encoder**
+
+   The encoder extracts hierarchical visual features from the input road-scene image. The released implementation focuses on the manuscript model and its ResNet-based variants.
+
+2. **Hierarchical Swin Context Module**
+
+   HSCM is inserted into intermediate encoder feature levels to enrich spatial representations through shifted-window attention. This design allows context-enhanced features to be propagated through subsequent residual stages and reused by the decoder.
+
+3. **Lightweight multi-level decoder**
+
+   The decoder progressively recovers spatial resolution and reconstructs the final binary lane mask. Multi-level feature fusion is used to combine deep semantic information with shallower geometric detail.
+
+## Model Variants
+
+The same HSCM-Lane architecture can be evaluated with different ResNet backbone capacities:
+
+| Variant | Backbone | Purpose |
+|---|---|---|
+| HSCM-Lane-S | ResNet18 | Main compact model and component-ablation reference |
+| HSCM-Lane-M | ResNet34 | Medium-capacity backbone comparison |
+| HSCM-Lane-L | ResNet50 | Large-capacity backbone comparison |
+
+The variants differ in backbone capacity, while the HSCM placement, shifted-window context design, decoder strategy, and training objective are kept consistent.
 
 ## Repository Scope
 
-This repository contains the code required for the manuscript model and its reproducibility workflow. Temporary development files, local environment folders, generated outputs, large datasets, trained checkpoints, and exploratory research variants are not included in order to keep the public release concise and reproducible.
+This repository is a focused research-code release. It contains the implementation files needed for the proposed model, dataset loading, training, validation, loss computation, metric evaluationn.
 
-Users should prepare the required datasets separately according to the official dataset instructions and update the dataset paths before running training or validation.
+The release does not include large datasets, trained checkpoints, generated outputs, temporary development files, local environment folders, or exploratory research variants. These materials are intentionally excluded to keep the repository concise, inspectable, and reproducible.
 
-## Main Files
+Users should download the required datasets from their official sources and configure the local dataset paths before running training or validation.
+
+## Repository Structure
 
 ```text
 .
@@ -29,23 +63,27 @@ Users should prepare the required datasets separately according to the official 
 └── README.md
 ```
 
-The main files serve the following purposes:
+## Main Files
 
-* `laneformer.py`: implementation of the proposed HSCM-Lane model.
-* `train.py`: training entry point for the manuscript model.
-* `val.py`: validation and evaluation entry point.
-* `run_with_5_interface_functions.py`: minimal example showing how to call the model through the main interface functions.
-* `BDD100K.py`: dataset interface for BDD100K-based experiments.
-* `TuSimple.py`: dataset interface for TuSimple-based evaluation or qualitative testing.
-* `loss.py`: loss functions used during model training.
-* `IOUEval.py`: evaluation utilities for segmentation metrics.
+| File | Description |
+|---|---|
+| `laneformer.py` | Core implementation of the HSCM-Lane model |
+| `train.py` | Training script for the lane-segmentation model |
+| `val.py` | Validation and metric-evaluation script |
+| `run_with_5_interface_functions.py` | Minimal example demonstrating the main model interface functions |
+| `BDD100K.py` | Dataset interface for BDD100K-based experiments |
+| `TuSimple.py` | Dataset interface for TuSimple-based evaluation or qualitative testing |
+| `loss.py` | Loss functions used for model optimization |
+| `IOUEval.py` | Intersection-over-union and segmentation-metric utilities |
 
-## Environment
+## Requirements
 
-The code requires a Python deep-learning environment with PyTorch and common computer-vision libraries. A typical environment includes:
+The code requires a Python environment with PyTorch and common computer-vision packages.
+
+A typical environment includes:
 
 ```text
-python
+python >= 3.8
 torch
 torchvision
 numpy
@@ -54,34 +92,54 @@ pillow
 tqdm
 ```
 
-Users may install the required packages manually or create their own environment according to their CUDA, PyTorch, and GPU configuration.
+The exact PyTorch and CUDA versions should be selected according to the user’s GPU and operating system.
 
 ## Dataset Preparation
 
-The datasets are not redistributed in this repository. Please download and prepare each dataset from its official source and ensure that the local directory structure matches the paths used by the dataset interface files.
+The datasets are not redistributed in this repository. Please obtain them from their official sources and follow the corresponding dataset licenses and terms of use.
 
-Before running the code, update the dataset paths in the corresponding scripts or dataset-interface files.
-
-Expected datasets:
+Expected datasets include:
 
 ```text
 BDD100K/
 TuSimple/
 ```
 
-The repository provides dataset-loading interfaces, but the image files and annotations must be prepared locally by the user.
+Before running the scripts, update the dataset root paths in the relevant dataset-interface files or training and validation scripts.
+
+A typical local structure may follow:
+
+```text
+datasets/
+├── BDD100K/
+│   ├── images/
+│   └── labels/
+└── TuSimple/
+    ├── clips/
+    └── label_data/
+```
+
+The exact structure may be adjusted according to the local preprocessing pipeline, provided that the dataset interface files are updated consistently.
 
 ## Training
 
-After preparing the dataset paths and environment, run:
+After preparing the environment and dataset paths, run:
 
 ```bash
 python train.py
 ```
 
-The training script loads the model, prepares the dataset, computes the loss, and updates the network parameters according to the manuscript setting.
+The training script initializes the model, loads the dataset, computes the training objective, and updates the network parameters.
 
-If necessary, users should adjust batch size, learning rate, dataset root, checkpoint path, and device settings according to their hardware environment.
+Before training, check the following settings:
+
+- dataset root path
+- input image size
+- batch size
+- learning rate
+- number of epochs
+- checkpoint output path
+- GPU or CPU device setting
 
 ## Validation
 
@@ -91,37 +149,13 @@ To evaluate a trained model, run:
 python val.py
 ```
 
-The validation script computes the segmentation metrics used to assess lane-line prediction quality. Users should verify that the checkpoint path and validation dataset path are correctly configured before running the script.
+Before validation, check the following settings:
 
-## Checkpoints
+- validation dataset path
+- checkpoint path
+- input image size
+- number of classes
+- metric configuration
+- output directory, if prediction masks or logs are saved
 
-Large trained checkpoint files are not bundled with this lightweight code release. If checkpoints are required for review or reproduction, they can be provided separately through an external storage link or supplementary material.
-
-When using a checkpoint, please update the checkpoint path in the validation or inference script before execution.
-
-## Reproducibility Notes
-
-To reproduce the manuscript experiments, users should keep the model configuration, input resolution, dataset split, training protocol, and evaluation script consistent with the manuscript. Differences in library versions, CUDA versions, GPU hardware, random seeds, and data preprocessing may lead to small numerical variations.
-
-The repository is therefore intended to provide transparent implementation details and a practical reproduction path, while the exact experimental protocol should be interpreted together with the manuscript.
-
-## Citation
-
-If this repository is useful for your research, please cite the accompanying manuscript.
-
-```bibtex
-@article{hscmlane,
-  title   = {HSCM-Lane: [Manuscript Title]},
-  author  = {[Author Names]},
-  journal = {[Journal Name]},
-  year    = {[Year]}
-}
-```
-
-## License
-
-Please use this repository for academic research and manuscript-review purposes. Dataset usage must follow the licenses and terms of the original dataset providers.
-
-## Contact
-
-For questions about the implementation or reproducibility workflow, please contact the corresponding author of the manuscript.
+The validation script computes the segmentation metrics used to evaluate lane-mask prediction
