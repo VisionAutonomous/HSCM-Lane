@@ -52,29 +52,42 @@ Users should download the required datasets from their official sources and conf
 
 ```text
 .
-├── laneformer.py
+├── configs/
+├── hscm_lane/
+│   ├── __init__.py
+│   ├── datasets.py
+│   ├── losses.py
+│   ├── metrics.py
+│   └── model.py
 ├── train.py
-├── val.py
-├── run_with_5_interface_functions.py
-├── BDD100K.py
-├── TuSimple.py
-├── loss.py
-├── IOUEval.py
+├── evaluate_bdd100k.py
+├── evaluate_tusimple.py
+├── infer_image.py
+├── requirements.txt
+├── CODE_AVAILABILITY.md
+├── LICENSE
 └── README.md
 ```
 
 ## Main Files
 
-| File | Description |
+| File or Directory | Description |
 |---|---|
-| `laneformer.py` | Core implementation of the HSCM-Lane model |
-| `train.py` | Training script for the lane-segmentation model |
-| `val.py` | Validation and metric-evaluation script |
-| `run_with_5_interface_functions.py` | Minimal example demonstrating the main model interface functions |
-| `BDD100K.py` | Dataset interface for BDD100K-based experiments |
-| `TuSimple.py` | Dataset interface for TuSimple-based evaluation or qualitative testing |
-| `loss.py` | Loss functions used for model optimization |
-| `IOUEval.py` | Intersection-over-union and segmentation-metric utilities |
+| `configs/` | Configuration files for training, validation, evaluation, and path settings. |
+| `hscm_lane/` | Main Python package containing the model, dataset utilities, losses, and metrics. |
+| `hscm_lane/model.py` | Core implementation of the HSCM-Lane architecture. |
+| `hscm_lane/datasets.py` | Dataset-loading and preprocessing utilities used by the training and evaluation scripts. |
+| `hscm_lane/losses.py` | Loss functions used for model optimization. |
+| `hscm_lane/metrics.py` | Segmentation-metric utilities used during validation and evaluation. |
+| `hscm_lane/__init__.py` | Package initialization file for importing HSCM-Lane modules. |
+| `train.py` | Main training script for the HSCM-Lane model. |
+| `evaluate_bdd100k.py` | Evaluation script for BDD100K-based lane-segmentation experiments. |
+| `evaluate_tusimple.py` | Evaluation script for TuSimple-based out-of-domain or qualitative evaluation. |
+| `infer_image.py` | Single-image inference script for generating lane-mask predictions from an input image. |
+| `requirements.txt` | Python package requirements for setting up the environment. |
+| `CODE_AVAILABILITY.md` | Code-availability statement describing the scope and reproducibility purpose of the release. |
+| `LICENSE` | License file for the released source code. |
+| `README.md` | Main documentation file for repository usage. |
 
 ## Requirements
 
