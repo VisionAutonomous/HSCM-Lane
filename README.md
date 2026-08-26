@@ -159,3 +159,26 @@ Before validation, check the following settings:
 - output directory, if prediction masks or logs are saved
 
 The validation script computes the segmentation metrics used to evaluate lane-mask prediction
+
+## How to Cite
+
+If you use this repository, the HSCM-Lane model, or any part of the implementation in your research, please cite the associated manuscript:
+
+```text
+Toai Ton Quang, Hien Vu Thanh, Nguyen Vu Thanh, and Tuong Le. 
+HSCM-Lane: A ResNet-Based Encoder-Decoder Architecture with Multi-Level Shifted-Window Context Modeling for Pixel-Wise Lane Segmentation. 
+Manuscript under review, 2026.
+```
+
+BibTeX entry:
+
+```bibtex
+@unpublished{quang2026hscmlane,
+  title  = {HSCM-Lane: A ResNet-Based Encoder-Decoder Architecture with Multi-Level Shifted-Window Context Modeling for Pixel-Wise Lane Segmentation},
+  author = {Quang, Toai Ton and Thanh, Hien Vu and Thanh, Nguyen Vu and Le, Tuong},
+  year   = {2026},
+  note   = {Manuscript under review}
+}
+```
+
+Once the paper is formally accepted or published, please replace this temporary citation with the final journal citation, including the journal name, volume, issue, page numbers, DOI, and publication year.
